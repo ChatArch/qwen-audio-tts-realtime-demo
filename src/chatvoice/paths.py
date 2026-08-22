@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from urllib.parse import urlparse
 
 
 @dataclass(frozen=True)
@@ -76,41 +75,21 @@ def ensure_runtime_dirs(paths: RuntimePaths | None = None) -> RuntimePaths:
 def database_settings() -> dict[str, object]:
     """Return a sanitized database configuration summary.
 
-    ChatVoice v0.1.8 ships the Speakr storage layer on SQLite WAL for a single
-    service node. External SQL URLs are detected and reported as the production
-    concurrency direction, but the packaged legacy web app fails closed unless a
-    SQLite path is used.
+    ChatVoice stores its packaged web data in one SQLite database file. Backup
+    and migration use file-level SQLite dumps/imports; there is no separate
+    database URL configuration in the ChatVoice ChatEnv schema.
     """
 
-    configured = os.getenv("CHATVOICE_DATABASE_URL", "").strip()
     paths = state_paths()
-    url = configured or f"sqlite:///{paths.database_path}"
-    parsed = urlparse(url)
-    scheme = parsed.scheme.lower()
-    if scheme in {"", "file"}:
-        backend = "sqlite"
-    elif scheme.startswith("sqlite"):
-        backend = "sqlite"
-    elif scheme.startswith("postgres"):
-        backend = "postgresql"
-    elif scheme.startswith("mysql") or scheme.startswith("mariadb"):
-        backend = "mysql"
-    else:
-        backend = scheme or "unknown"
-    supported = backend == "sqlite"
+    configured = bool(os.getenv("MEETING_DB_PATH", "").strip() or os.getenv("CHATVOICE_SQLITE_PATH", "").strip())
     return {
-        "configured": bool(configured),
-        "backend": backend,
-        "supported_by_packaged_web_app": supported,
-        "url_is_sensitive": True,
-        "sqlite_path": str(paths.database_path) if backend == "sqlite" else None,
-        "concurrency": "single-node-wal" if supported else "external-db-contract-pending",
-        "note": (
-            "SQLite WAL is suitable for one ChatVoice service process and light concurrency. "
-            "Use a single service node or migrate the storage layer before high-concurrency multi-worker deployment."
-            if supported
-            else "External DB URL detected; provider/API architecture supports this deployment direction, but v0.1.8 web storage still needs the SQL repository migration before use."
-        ),
+        "configured": configured,
+        "backend": "sqlite",
+        "supported_by_packaged_web_app": True,
+        "sqlite_path": str(paths.database_path),
+        "backup_unit": "single-sqlite-file",
+        "concurrency": "single-node-wal",
+        "note": "ChatVoice uses one SQLite database file. Use `chatvoice data dump` to create a consistent single-file backup and `chatvoice data import` to restore one.",
     }
 
 

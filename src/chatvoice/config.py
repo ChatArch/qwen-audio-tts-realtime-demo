@@ -7,9 +7,10 @@ class ChatVoiceConfig(BaseEnvConfig):
     """ChatVoice ChatEnv configuration.
 
     ChatVoice uses ChatEnv as the single durable configuration surface.
-    Model-provider settings intentionally use the OpenAI-compatible names
-    (`OPENAI_API_BASE`, `OPENAI_API_KEY`, `OPENAI_API_MODEL`) so deployment
-    does not invent a parallel Qwen/DashScope env system.
+    Model-provider settings intentionally use service-scoped OpenAI-compatible
+    names (`CHATVOICE_OPENAI_API_BASE`, `CHATVOICE_OPENAI_API_KEY`,
+    `CHATVOICE_OPENAI_API_MODEL`) so they do not overlap with ChatEnv
+    built-in OpenAI provider profiles.
     """
 
     _title = "ChatVoice Configuration"
@@ -36,11 +37,6 @@ class ChatVoiceConfig(BaseEnvConfig):
         desc="Optional ASR API bearer token",
         is_sensitive=True,
     )
-    CHATVOICE_DATABASE_URL = EnvField(
-        "CHATVOICE_DATABASE_URL",
-        desc="Database URL. Packaged web storage currently supports SQLite only; external DB is detected for migration planning.",
-        is_sensitive=True,
-    )
     CHATVOICE_HOME = EnvField(
         "CHATVOICE_HOME",
         desc="Override ChatVoice runtime root. Defaults to $CHATARCH_HOME/chatvoice or ~/.chatarch/chatvoice.",
@@ -60,30 +56,30 @@ class ChatVoiceConfig(BaseEnvConfig):
     )
     CHATVOICE_MEETING_NOTES_MODEL = EnvField(
         "CHATVOICE_MEETING_NOTES_MODEL",
-        desc="Optional override for meeting-notes generation; defaults to OPENAI_API_MODEL.",
+        desc="Optional override for meeting-notes generation; defaults to CHATVOICE_OPENAI_API_MODEL."
     )
     CHATVOICE_MEETING_TITLE_MODEL = EnvField(
         "CHATVOICE_MEETING_TITLE_MODEL",
-        desc="Optional override for meeting-title generation; defaults to OPENAI_API_MODEL.",
+        desc="Optional override for meeting-title generation; defaults to CHATVOICE_OPENAI_API_MODEL."
     )
     CHATVOICE_REALTIME_MODELS = EnvField(
         "CHATVOICE_REALTIME_MODELS",
         desc="Optional comma-separated allowlist for realtime audio models.",
     )
-    OPENAI_API_BASE = EnvField(
-        "OPENAI_API_BASE",
+    CHATVOICE_OPENAI_API_BASE = EnvField(
+        "CHATVOICE_OPENAI_API_BASE",
         default="https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
-        desc="OpenAI-compatible model API base URL. Token Plan deployments use this OpenAI-compatible base.",
+        desc="ChatVoice-scoped OpenAI-compatible model API base URL. Token Plan deployments use this OpenAI-compatible base.",
     )
-    OPENAI_API_KEY = EnvField(
-        "OPENAI_API_KEY",
-        desc="OpenAI-compatible model API key. ChatVoice production accepts Token Plan sk-sp keys by default.",
+    CHATVOICE_OPENAI_API_KEY = EnvField(
+        "CHATVOICE_OPENAI_API_KEY",
+        desc="ChatVoice-scoped OpenAI-compatible model API key. ChatVoice production accepts Token Plan sk-sp keys by default.",
         is_sensitive=True,
     )
-    OPENAI_API_MODEL = EnvField(
-        "OPENAI_API_MODEL",
+    CHATVOICE_OPENAI_API_MODEL = EnvField(
+        "CHATVOICE_OPENAI_API_MODEL",
         default="qwen3.7-plus",
-        desc="Default OpenAI-compatible model for text/model-backed tasks.",
+        desc="Default ChatVoice-scoped OpenAI-compatible model for text/model-backed tasks.",
     )
 
 

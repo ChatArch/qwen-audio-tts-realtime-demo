@@ -11,6 +11,7 @@ from chatstyle import add_tree_option
 from chatvoice import __version__
 from chatvoice.accounts import AccountRuntimeError, create_account, list_accounts
 from chatvoice.asr import get_asr_channels
+from chatvoice.backup import DataBackupError, dump_database, import_database
 from chatvoice.client import (
     ChatVoiceApiError,
     create_remote_token,
@@ -279,6 +280,37 @@ def data_conversation_command(conversation_id: str, url: str, token_env: str, ti
     """Read one realtime conversation; outputs stored messages."""
 
     payload = _api_call(get_remote_conversation, url, _resolved_api_token(token_env), conversation_id, timeout=timeout)
+    _emit(payload, as_json=as_json)
+
+
+@data_group.command("dump")
+@click.option("--output", "output_path", required=True, type=click.Path(dir_okay=False, path_type=str), help="Destination SQLite backup file.")
+@click.option("--overwrite", is_flag=True, help="Overwrite the output file if it already exists.")
+@click.option("--json", "as_json", is_flag=True, help="Print JSON output.")
+def data_dump_command(output_path: str, overwrite: bool, as_json: bool) -> None:
+    """Dump local ChatVoice data to one consistent SQLite file."""
+
+    try:
+        payload = dump_database(output_path, overwrite=overwrite).as_dict()
+    except DataBackupError as exc:
+        raise click.ClickException(str(exc)) from exc
+    _emit(payload, as_json=as_json)
+
+
+@data_group.command("import")
+@click.argument("input_path", type=click.Path(exists=True, dir_okay=False, path_type=str))
+@click.option("--yes", is_flag=True, help="Confirm replacing the active local SQLite database file.")
+@click.option("--no-backup-current", is_flag=True, help="Do not create a backup of the current database before replacing it.")
+@click.option("--json", "as_json", is_flag=True, help="Print JSON output.")
+def data_import_command(input_path: str, yes: bool, no_backup_current: bool, as_json: bool) -> None:
+    """Import one SQLite dump as the active local database; stop the service first."""
+
+    if not yes:
+        raise click.ClickException("Refusing to replace the active database without --yes. Stop the service first, then retry with --yes.")
+    try:
+        payload = import_database(input_path, backup_current=not no_backup_current).as_dict()
+    except DataBackupError as exc:
+        raise click.ClickException(str(exc)) from exc
     _emit(payload, as_json=as_json)
 
 

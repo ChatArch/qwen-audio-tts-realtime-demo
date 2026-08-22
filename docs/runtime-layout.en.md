@@ -1,6 +1,6 @@
 # Runtime Layout and Data Structure
 
-This page documents where `pip install "ChatVoice[web]==0.1.10"` installs code, where runtime data is written by default, and which data lives in SQLite versus the browser.
+This page documents where `pip install "ChatVoice[web]==0.1.11"` installs code, where runtime data is written by default, and which data lives in SQLite versus the browser.
 
 ## Code install location
 
@@ -105,16 +105,26 @@ The Settings page shows only whether server-side API keys are configured. It nev
 export CHATVOICE_ASR_CHANNEL=api-server
 export CHATVOICE_ASR_API_URL="https://<asr-service>/v1/transcribe"
 # Store CHATVOICE_ASR_API_KEY in the ChatEnv ChatVoice profile when the ASR endpoint requires it.
-# Store OPENAI_API_BASE / OPENAI_API_KEY / OPENAI_API_MODEL in the ChatEnv ChatVoice profile.
-# Production OPENAI_API_KEY should be a Token Plan sk-sp... key, not a usage-billed sk-... key.
+# Store CHATVOICE_OPENAI_API_BASE / CHATVOICE_OPENAI_API_KEY / CHATVOICE_OPENAI_API_MODEL in the ChatEnv ChatVoice profile.
+# Production CHATVOICE_OPENAI_API_KEY should be a Token Plan sk-sp... key, not a usage-billed sk-... key.
+```
+
+## Data backup / restore
+
+ChatVoice packaged storage is one SQLite file and does not need a `DATABASE_URL`. Backups and moves are file-level operations:
+
+```bash
+chatvoice data dump --output backup.sqlite3 --json
+# Stop the writing service before restore; import backs up the current DB by default.
+chatvoice data import backup.sqlite3 --yes --json
 ```
 
 ## High-concurrency TODO
 
-The `0.1.10` packaged legacy storage still supports SQLite WAL only. It is suitable for one service process, light concurrency, and controlled internal use:
+The `0.1.11` packaged storage supports SQLite WAL. It is suitable for one service process, light concurrency, and controlled internal use:
 
 ```bash
 chatvoice serve app --workers 1
 ```
 
-High-concurrency production is tracked as TODO, not implemented in this release. Before scaling to multiple workers or nodes, migrate `accounts`, `auth_sessions`, `api_tokens`, `meeting_records`, and `conversation_records` to Postgres/MySQL and add a proper repository layer plus migration scripts.
+Future high-concurrency Postgres/MySQL support is a separate storage-layer migration, not a current `DATABASE_URL` switch. Before scaling to multiple workers or nodes, migrate `accounts`, `auth_sessions`, `api_tokens`, `meeting_records`, and `conversation_records` to an external database and add a proper repository layer plus migration scripts.

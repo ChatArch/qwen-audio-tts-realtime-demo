@@ -214,7 +214,7 @@ checks["stub_still_available"] = bool(stub.get("board_event") and base64.b64enco
 original_profile = main._read_profile
 original_env = os.environ.copy()
 try:
-    main._read_profile = lambda: {"OPENAI_API_MODEL": "deepseek-v4-pro-0813"}
+    main._read_profile = lambda: {"CHATVOICE_OPENAI_API_MODEL": "deepseek-v4-pro-0813"}
     checks["meeting_notes_model_prefers_profile"] = main._meeting_notes_model() == "deepseek-v4-pro-0813"
 finally:
     main._read_profile = original_profile

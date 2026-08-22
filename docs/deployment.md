@@ -1,6 +1,6 @@
 # 部署与启动
 
-这一页说明 v0.1.10 发布后，如何只通过 Python 包搭起一套 ChatVoice / Speakr 服务流程：安装、创建账号、启动服务、生成 API Token、读取会议/摘要数据。
+这一页说明 v0.1.11 发布后，如何只通过 Python 包搭起一套 ChatVoice / Speakr 服务流程：安装、创建账号、启动服务、生成 API Token、读取会议/摘要数据。
 
 ## 最小安装
 
@@ -8,7 +8,7 @@
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "ChatVoice[web]==0.1.10"
+python -m pip install "ChatVoice[web]==0.1.11"
 ```
 
 安装后先回读真实 CLI 树和运行目录：
@@ -66,7 +66,7 @@ http://127.0.0.1:18087/
 
 ## ASR provider：API 优先
 
-v0.1.10 的生产推荐方式是 **ChatVoice 后端通过 API 调用 ASR 服务**。这个 ASR 服务可以是：
+v0.1.11 的生产推荐方式是 **ChatVoice 后端通过 API 调用 ASR 服务**。这个 ASR 服务可以是：
 
 - 云服务 API，凭 API key 调用；
 - 自建 GPU ASR server，对外暴露 HTTP API；
@@ -81,7 +81,7 @@ export CHATVOICE_ASR_API_URL="https://<asr-service>/v1/transcribe"
 chatvoice serve app --host 127.0.0.1 --port 18087
 ```
 
-Web 的 **识别设置 → 服务端 API Key** 会显示 `CHATVOICE_ASR_API_KEY`、Token Plan `OPENAI_API_KEY` 和本地 VoiceClone sidecar 是否已配置；这里只显示状态，不在浏览器保存密钥明文。服务端配置统一放在 ChatEnv `ChatVoice` profile：`OPENAI_API_BASE` / `OPENAI_API_KEY` / `OPENAI_API_MODEL`。生产默认只接受 `sk-sp...` Token Plan key，避免普通按量 `sk-...` 误扣费。
+Web 的 **识别设置 → 服务端 API Key** 会显示 `CHATVOICE_ASR_API_KEY`、Token Plan `CHATVOICE_OPENAI_API_KEY` 和本地 VoiceClone sidecar 是否已配置；这里只显示状态，不在浏览器保存密钥明文。服务端配置统一放在 ChatEnv `ChatVoice` profile：`CHATVOICE_OPENAI_API_BASE` / `CHATVOICE_OPENAI_API_KEY` / `CHATVOICE_OPENAI_API_MODEL`。生产默认只接受 `sk-sp...` Token Plan key，避免普通按量 `sk-...` 误扣费。
 
 ChatVoice 会把上传音频以 multipart `file` 字段 POST 到 `CHATVOICE_ASR_API_URL`，并从 ASR JSON 响应里读取 `corrected_text`、`text`、`transcript`、`raw_text`、`data.text` 或 `result.text`。
 
@@ -110,7 +110,7 @@ chatvoice data conversations --url http://127.0.0.1:18087 --token-env CHATVOICE_
 
 ## 数据库与并发边界
 
-v0.1.10 packaged Web app 默认使用 SQLite WAL：
+v0.1.11 packaged Web app 默认使用 SQLite WAL：
 
 ```text
 <chatarch-home>/chatvoice/data/meetings.sqlite3
@@ -122,8 +122,9 @@ v0.1.10 packaged Web app 默认使用 SQLite WAL：
 
 - `chatvoice serve app --workers 1`；
 - 不要用多 worker / 多节点同时写同一个 SQLite 文件；
-- 高并发生产部署应把存储层迁移到 Postgres/MySQL 这类外部数据库后再扩多 worker；
-- an external database URL setting 会被 `doctor` / `service plan` 检测并报告，但 v0.1.10 的 packaged legacy storage 仍只真正支持 SQLite。
+- 数据库备份/迁移以单 SQLite 文件为单位，用 CLI dump/restore 命令处理；
+- 高并发 Postgres/MySQL 是未来单独 storage-layer migration，不是当前 `DATABASE_URL` 开关；
+- packaged storage layer 没有 `DATABASE_URL` 配置项，生效数据库就是解析后的 `meetings.sqlite3` 文件。
 
 回读：
 

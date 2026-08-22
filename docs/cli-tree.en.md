@@ -20,6 +20,8 @@ chatvoice
 ├── data  # Read meeting and conversation records from a running service.
 │   ├── conversation <CONVERSATION-ID> [--url URL] [--token-env TOKEN-ENV] [--timeout TIMEOUT] [--json]  # Read one realtime conversation; outputs stored messages.
 │   ├── conversations [--url URL] [--token-env TOKEN-ENV] [--timeout TIMEOUT] [--json]  # List realtime conversation metadata; read-only output.
+│   ├── dump [--output OUTPUT-PATH] [--overwrite] [--json]  # Dump local ChatVoice data to one consistent SQLite file.
+│   ├── import <INPUT-PATH> [--yes] [--no-backup-current] [--json]  # Import one SQLite dump as the active local database; stop the service first.
 │   ├── meeting <MEETING-ID> [--url URL] [--token-env TOKEN-ENV] [--timeout TIMEOUT] [--json]  # Read one meeting; outputs its transcript and summary.
 │   └── meetings [--url URL] [--token-env TOKEN-ENV] [--timeout TIMEOUT] [--json]  # List meeting metadata; read-only text or JSON output.
 ├── doctor [--json]  # Check local service readiness; read-only and secret-safe.
@@ -52,6 +54,8 @@ chatvoice
 ├── data  # Read meeting and conversation records from a running service.
 │   ├── conversation  # Read one realtime conversation; outputs stored messages.
 │   ├── conversations  # List realtime conversation metadata; read-only output.
+│   ├── dump  # Dump local ChatVoice data to one consistent SQLite file.
+│   ├── import  # Import one SQLite dump as the active local database; stop the service first.
 │   ├── meeting  # Read one meeting; outputs its transcript and summary.
 │   └── meetings  # List meeting metadata; read-only text or JSON output.
 ├── doctor  # Check local service readiness; read-only and secret-safe.
@@ -71,7 +75,7 @@ chatvoice
 ## Fresh-start service entry
 
 ```bash
-python -m pip install "ChatVoice[web]==0.1.10"
+python -m pip install "ChatVoice[web]==0.1.11"
 chatvoice service plan --ensure-dirs --json
 chatvoice serve app --host 127.0.0.1 --port 18087
 ```

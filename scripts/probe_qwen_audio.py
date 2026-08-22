@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Minimal sanitized probes for Token Plan audio models.
 
-Reads OPENAI_API_KEY from the ChatEnv-derived process environment. The key must
+Reads CHATVOICE_OPENAI_API_KEY from the ChatEnv-derived process environment. The key must
 be a Token Plan sk-sp key. Prints only sanitized status metadata; never prints
 the API key or full signed audio URL.
 """
@@ -40,12 +40,12 @@ def redact_url(url: str) -> str:
 
 def load_api_key(env_file: str | None = None) -> str:
     if env_file:
-        raise RuntimeError("--env-file is no longer supported; use the ChatEnv ChatVoice profile and OPENAI_API_KEY")
-    key = os.getenv("OPENAI_API_KEY", "").strip()
+        raise RuntimeError("--env-file is no longer supported; use the ChatEnv ChatVoice profile and CHATVOICE_OPENAI_API_KEY")
+    key = os.getenv("CHATVOICE_OPENAI_API_KEY", "").strip()
     if not key:
-        raise RuntimeError("No OPENAI_API_KEY found in the ChatEnv-derived process environment")
+        raise RuntimeError("No CHATVOICE_OPENAI_API_KEY found in the ChatEnv-derived process environment")
     if not key.startswith("sk-sp"):
-        raise RuntimeError("OPENAI_API_KEY must be a Token Plan sk-sp key")
+        raise RuntimeError("CHATVOICE_OPENAI_API_KEY must be a Token Plan sk-sp key")
     return key
 
 
@@ -223,7 +223,7 @@ def probe_realtime(args: argparse.Namespace) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["tts", "realtime"])
-    ap.add_argument("--env-file", default=None, help="Deprecated; use the ChatEnv ChatVoice profile and OPENAI_API_KEY")
+    ap.add_argument("--env-file", default=None, help="Deprecated; use the ChatEnv ChatVoice profile and CHATVOICE_OPENAI_API_KEY")
     ap.add_argument("--timeout", type=float, default=20)
     ap.add_argument("--outdir", default="playground/probe-output")
     ap.add_argument("--text", default="你好，这是千问语音合成的最小探针。")

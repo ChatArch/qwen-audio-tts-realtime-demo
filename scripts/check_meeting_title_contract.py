@@ -11,7 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from chatvoice.web import legacy_app as main  # noqa: E402
 
 checks: dict[str, object] = {}
-checks["title_model_follows_openai_api_model"] = main._meeting_title_model() == main._read_profile().get("OPENAI_API_MODEL")
+checks["title_model_follows_openai_api_model"] = main._meeting_title_model() == main._read_profile().get("CHATVOICE_OPENAI_API_MODEL")
 checks["title_route_exists"] = any(getattr(route, "path", None) == "/api/meeting-title" for route in main.app.routes)
 checks["title_prefix_is_removed"] = main._normalize_meeting_title("会议标题：《实时转写产品方案讨论》。") == "实时转写产品方案讨论"
 checks["title_is_bounded"] = len(main._normalize_meeting_title("标题：" + "测试" * 30)) <= 28

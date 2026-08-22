@@ -38,8 +38,8 @@ def test_status_exposes_sanitized_server_side_api_key_configuration(monkeypatch,
     monkeypatch.setenv("CHATVOICE_ASR_CHANNEL", "api-server")
     monkeypatch.setenv("CHATVOICE_ASR_API_URL", "https://asr.example.test/v1/transcribe")
     monkeypatch.setenv("CHATVOICE_ASR_API_KEY", "secret-asr-key")
-    monkeypatch.setenv("OPENAI_API_BASE", "https://token-plan.example.test/compatible-mode/v1")
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-sp-test-token-plan-key")
+    monkeypatch.setenv("CHATVOICE_OPENAI_API_BASE", "https://token-plan.example.test/compatible-mode/v1")
+    monkeypatch.setenv("CHATVOICE_OPENAI_API_KEY", "sk-sp-test-token-plan-key")
     try:
         legacy_app = importlib.import_module(module_name)
         from fastapi.testclient import TestClient
@@ -71,14 +71,14 @@ def test_tts_returns_503_without_model_key_instead_of_500(monkeypatch, tmp_path)
     sys.modules.pop(module_name, None)
     monkeypatch.setenv("CHATARCH_HOME", str(tmp_path / "chatarch-home"))
     monkeypatch.setenv("CHATVOICE_ASR_CHANNEL", "stub-local")
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("CHATVOICE_OPENAI_API_KEY", raising=False)
     try:
         legacy_app = importlib.import_module(module_name)
         from fastapi.testclient import TestClient
 
         response = TestClient(legacy_app.app).post("/api/tts", json={"text": "测试", "voice": "longanlingxin", "format": "mp3"})
         assert response.status_code == 503
-        assert "OPENAI_API_KEY" in response.json()["detail"]
+        assert "CHATVOICE_OPENAI_API_KEY" in response.json()["detail"]
     finally:
         sys.modules.pop(module_name, None)
 
@@ -91,7 +91,7 @@ def test_tts_rejects_usage_billed_openai_key(monkeypatch, tmp_path):
     sys.modules.pop(module_name, None)
     monkeypatch.setenv("CHATARCH_HOME", str(tmp_path / "chatarch-home"))
     monkeypatch.setenv("CHATVOICE_ASR_CHANNEL", "stub-local")
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-usage-billed-key")
+    monkeypatch.setenv("CHATVOICE_OPENAI_API_KEY", "sk-usage-billed-key")
     try:
         legacy_app = importlib.import_module(module_name)
         from fastapi.testclient import TestClient
@@ -117,14 +117,14 @@ def test_status_reads_token_plan_key_from_chatenv_chatvoice_profile(monkeypatch,
     module_name = "chatvoice.web.legacy_app"
     sys.modules.pop(module_name, None)
     monkeypatch.setenv("CHATARCH_HOME", str(tmp_path / "chatarch-home"))
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("CHATVOICE_OPENAI_API_KEY", raising=False)
     store = EnvStore(get_paths(tmp_path / "chatarch-home").envs_dir)
     store.save_active(
         ChatVoiceConfig,
         {
-            "OPENAI_API_BASE": "https://token-plan.example.test/compatible-mode/v1",
-            "OPENAI_API_KEY": "sk-sp-from-chatenv-profile",
-            "OPENAI_API_MODEL": "qwen3.7-plus",
+            "CHATVOICE_OPENAI_API_BASE": "https://token-plan.example.test/compatible-mode/v1",
+            "CHATVOICE_OPENAI_API_KEY": "sk-sp-from-chatenv-profile",
+            "CHATVOICE_OPENAI_API_MODEL": "qwen3.7-plus",
         },
     )
     try:

@@ -23,20 +23,24 @@ def test_config_marks_credentials_and_database_url_sensitive():
 
     for name in (
         "CHATVOICE_ASR_API_KEY",
-        "CHATVOICE_DATABASE_URL",
-        "OPENAI_API_KEY",
+        "CHATVOICE_OPENAI_API_KEY",
     ):
         assert fields[name].is_sensitive is True
 
     assert "QWEN_TOKEN_PLAN_ENV_FILE" not in fields
     assert "DASHSCOPE_API_KEY" not in fields
     assert "DASHSCOPE_VOICE_API_KEY" not in fields
-    assert "OPENAI_API_BASE" in fields
-    assert "OPENAI_API_MODEL" in fields
+    assert "CHATVOICE_DATABASE_URL" not in fields
+    assert "OPENAI_API_BASE" not in fields
+    assert "OPENAI_API_KEY" not in fields
+    assert "OPENAI_API_MODEL" not in fields
+    assert "CHATVOICE_OPENAI_API_BASE" in fields
+    assert "CHATVOICE_OPENAI_API_KEY" in fields
+    assert "CHATVOICE_OPENAI_API_MODEL" in fields
     assert "CHATVOICE_MEETING_NOTES_MODEL" in fields
     assert "CHATVOICE_MEETING_TITLE_MODEL" in fields
     assert "CHATVOICE_REALTIME_MODELS" in fields
-    assert fields["OPENAI_API_MODEL"].default == "qwen3.7-plus"
+    assert fields["CHATVOICE_OPENAI_API_MODEL"].default == "qwen3.7-plus"
 
 
 def test_config_uses_canonical_chatenv_profile_storage_paths(tmp_path):

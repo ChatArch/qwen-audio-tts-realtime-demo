@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Token Plan TTS probe using the OpenAI-compatible ChatEnv model key.
 
-Reads OPENAI_API_KEY from the active process/ChatEnv-derived environment.
+Reads CHATVOICE_OPENAI_API_KEY from the active process/ChatEnv-derived environment.
 The key must be a Token Plan sk-sp key. Prints only sanitized metadata.
 """
 from __future__ import annotations
@@ -28,11 +28,11 @@ def read_env_file(path: str | None) -> dict[str, str]:
 
 
 def load_key() -> str:
-    key = os.getenv("OPENAI_API_KEY", "").strip()
+    key = os.getenv("CHATVOICE_OPENAI_API_KEY", "").strip()
     if not key:
-        raise RuntimeError("No OPENAI_API_KEY found in the ChatEnv-derived process environment")
+        raise RuntimeError("No CHATVOICE_OPENAI_API_KEY found in the ChatEnv-derived process environment")
     if not key.startswith("sk-sp"):
-        raise RuntimeError("OPENAI_API_KEY must be a Token Plan sk-sp key")
+        raise RuntimeError("CHATVOICE_OPENAI_API_KEY must be a Token Plan sk-sp key")
     return key
 
 

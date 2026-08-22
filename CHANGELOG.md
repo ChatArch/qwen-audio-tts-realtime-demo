@@ -1,12 +1,20 @@
 # Changelog
 
+## 0.1.11 - 2026-08-22
+
+### Changed
+
+- Move ChatVoice model-provider ChatEnv fields from global `OPENAI_API_BASE` / `OPENAI_API_KEY` / `OPENAI_API_MODEL` names to service-scoped `CHATVOICE_OPENAI_API_BASE` / `CHATVOICE_OPENAI_API_KEY` / `CHATVOICE_OPENAI_API_MODEL`, so ChatVoice no longer overlaps the built-in ChatEnv OpenAI provider.
+- Remove `CHATVOICE_DATABASE_URL` from the ChatVoice schema and service plan; packaged storage is one SQLite file, with file-level dump/import as the supported backup path.
+- Add `chatvoice data dump` and `chatvoice data import` for local single-file SQLite backup/restore, including integrity checks and a current-database backup before import.
+
 ## 0.1.10 - 2026-08-22
 
 ### Fixed
 
 - Fix the Voice Studio reference-audio form layout so the `录参考音` button stays inside the left composer column instead of overflowing underneath the right `试听结果` panel on medium-width screens.
 - Align ChatVoice runtime configuration with the ChatArch ChatEnv/ChatStyle standard: ChatEnv storage is now the canonical `ChatVoice` namespace, the CLI relies directly on ChatStyle `add_tree_option()`, and the web app reads the active ChatEnv profile instead of a package-local env-file pointer.
-- Configure model-provider access through OpenAI-compatible `OPENAI_API_BASE` / `OPENAI_API_KEY` / `OPENAI_API_MODEL` only. The system voice path rejects non-Token-Plan `sk-...` keys by default and requires an `sk-sp...` Token Plan key to avoid usage-billed calls.
+- Configure model-provider access through OpenAI-compatible `CHATVOICE_OPENAI_API_BASE` / `CHATVOICE_OPENAI_API_KEY` / `CHATVOICE_OPENAI_API_MODEL` only. The system voice path rejects non-Token-Plan `sk-...` keys by default and requires an `sk-sp...` Token Plan key to avoid usage-billed calls.
 - Remove the legacy direct voice-enrollment key path from the product surface; one-shot voice cloning uses the local VoiceClone sidecar (`/api/voice-clone/*`) only.
 - Add static and API contract assertions for the flexible clone form layout, canonical ChatEnv storage, ChatStyle CLI tree integration, ChatEnv model-key loading, and Token Plan key guard.
 

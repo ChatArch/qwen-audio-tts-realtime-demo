@@ -1,6 +1,6 @@
 # Deployment and Startup
 
-This page explains how to run a ChatVoice / Speakr service from the released Python package in v0.1.10: install, create an account, start the service, generate an API token, and read meeting/summary data.
+This page explains how to run a ChatVoice / Speakr service from the released Python package in v0.1.11: install, create an account, start the service, generate an API token, and read meeting/summary data.
 
 ## Minimal install
 
@@ -8,7 +8,7 @@ This page explains how to run a ChatVoice / Speakr service from the released Pyt
 python -m venv .venv
 . .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install "ChatVoice[web]==0.1.10"
+python -m pip install "ChatVoice[web]==0.1.11"
 ```
 
 Read back the real CLI tree and runtime paths first:
@@ -66,7 +66,7 @@ For production, put the service behind a controlled reverse proxy. API keys stay
 
 ## ASR provider: API first
 
-The recommended production shape in v0.1.10 is **ChatVoice calls ASR through an API provider**. That provider can be:
+The recommended production shape in v0.1.11 is **ChatVoice calls ASR through an API provider**. That provider can be:
 
 - a managed cloud ASR API with an API key;
 - a self-hosted GPU ASR server exposing HTTP;
@@ -81,7 +81,7 @@ export CHATVOICE_ASR_API_URL="https://<asr-service>/v1/transcribe"
 chatvoice serve app --host 127.0.0.1 --port 18087
 ```
 
-The browser **Settings → Server-side API Key** panel shows whether `CHATVOICE_ASR_API_KEY`, the Token Plan `OPENAI_API_KEY`, and the local VoiceClone sidecar are configured. It displays status only and never stores raw key values in the browser. Server configuration is stored in the ChatEnv `ChatVoice` profile: `OPENAI_API_BASE` / `OPENAI_API_KEY` / `OPENAI_API_MODEL`. Production accepts `sk-sp...` Token Plan keys by default to avoid accidental usage-billed `sk-...` calls.
+The browser **Settings → Server-side API Key** panel shows whether `CHATVOICE_ASR_API_KEY`, the Token Plan `CHATVOICE_OPENAI_API_KEY`, and the local VoiceClone sidecar are configured. It displays status only and never stores raw key values in the browser. Server configuration is stored in the ChatEnv `ChatVoice` profile: `CHATVOICE_OPENAI_API_BASE` / `CHATVOICE_OPENAI_API_KEY` / `CHATVOICE_OPENAI_API_MODEL`. Production accepts `sk-sp...` Token Plan keys by default to avoid accidental usage-billed `sk-...` calls.
 
 ChatVoice sends uploaded audio to `CHATVOICE_ASR_API_URL` as multipart field `file` and reads `corrected_text`, `text`, `transcript`, `raw_text`, `data.text`, or `result.text` from the ASR JSON response.
 
@@ -110,7 +110,7 @@ See [API Access](api-access.md) for details.
 
 ## Database and concurrency boundary
 
-The v0.1.10 packaged web app uses SQLite WAL by default:
+The v0.1.11 packaged web app uses SQLite WAL by default:
 
 ```text
 <chatarch-home>/chatvoice/data/meetings.sqlite3
@@ -122,8 +122,9 @@ This is suitable for one service process, light concurrency, and controlled inte
 
 - run `chatvoice serve app --workers 1`;
 - do not run multiple workers/nodes writing the same SQLite file;
-- high-concurrency production needs a storage-layer migration to Postgres/MySQL before scaling workers;
-- an external database URL setting is detected by `doctor` / `service plan`, but the v0.1.10 packaged legacy storage layer still supports SQLite only.
+- back up or move database state as one SQLite file with the CLI dump/restore commands;
+- future high-concurrency Postgres/MySQL support is a separate storage-layer migration, not a current `DATABASE_URL` switch;
+- there is no `DATABASE_URL` ChatVoice setting in the packaged storage layer; the active database is the resolved `meetings.sqlite3` file.
 
 Read back the effective plan:
 

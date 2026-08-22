@@ -94,7 +94,7 @@ VOICECLONE_API_URL = _env_value("CHATVOICE_VOICECLONE_URL", "VOICECLONE_API_URL"
 VOICECLONE_API_TIMEOUT_SECONDS = float(_env_value("CHATVOICE_VOICECLONE_TIMEOUT_SECONDS", default="180"))
 MAX_VOICECLONE_REFERENCE_BYTES = int(_env_value("CHATVOICE_VOICECLONE_MAX_REFERENCE_BYTES", default=str(50 * 1024 * 1024)))
 DEFAULT_ASR_CHANNEL = _env_value("CHATVOICE_ASR_CHANNEL", "DEFAULT_ASR_CHANNEL").strip() or ("api-server" if ASR_API_URL else "stub-local")
-MEETING_NOTES_MODEL = _env_value("CHATVOICE_MEETING_NOTES_MODEL", "OPENAI_API_MODEL", default="qwen3.7-plus")
+MEETING_NOTES_MODEL = _env_value("CHATVOICE_MEETING_NOTES_MODEL", "CHATVOICE_OPENAI_API_MODEL", default="qwen3.7-plus")
 MEETING_TITLE_MODEL = _env_value("CHATVOICE_MEETING_TITLE_MODEL", default="qwen3.6-flash")
 ALLOWED_ASR_STREAM_SAMPLE_RATES = {8000, 16000, 24000, 48000}
 MIN_ASR_STREAM_CHUNK_SECONDS = 0.5
@@ -272,31 +272,31 @@ def _is_token_plan_key(key: str) -> bool:
 
 def _token_plan_key() -> str:
     profile = _read_profile()
-    key = (profile.get("OPENAI_API_KEY") or "").strip()
+    key = (profile.get("CHATVOICE_OPENAI_API_KEY") or "").strip()
     if not key:
-        raise HTTPException(status_code=503, detail="系统音色未配置模型 Key：请在 ChatEnv ChatVoice profile 设置 Token Plan 的 OPENAI_API_KEY（sk-sp...）。")
+        raise HTTPException(status_code=503, detail="系统音色未配置模型 Key：请在 ChatEnv ChatVoice profile 设置 Token Plan 的 CHATVOICE_OPENAI_API_KEY（sk-sp...）。")
     if not _is_token_plan_key(key):
-        raise HTTPException(status_code=503, detail="系统音色拒绝使用非 Token Plan Key：OPENAI_API_KEY 必须是 sk-sp...，避免按量扣费。")
+        raise HTTPException(status_code=503, detail="系统音色拒绝使用非 Token Plan Key：CHATVOICE_OPENAI_API_KEY 必须是 sk-sp...，避免按量扣费。")
     return key
 
 
 def _token_plan_base() -> str:
     profile = _read_profile()
-    return profile.get("OPENAI_API_BASE", "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1").rstrip("/")
+    return profile.get("CHATVOICE_OPENAI_API_BASE", "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1").rstrip("/")
 
 
 def _meeting_notes_model(req_model: str | None = None) -> str:
     if req_model:
         return req_model
     profile = _read_profile()
-    return profile.get("CHATVOICE_MEETING_NOTES_MODEL") or profile.get("OPENAI_API_MODEL") or MEETING_NOTES_MODEL
+    return profile.get("CHATVOICE_MEETING_NOTES_MODEL") or profile.get("CHATVOICE_OPENAI_API_MODEL") or MEETING_NOTES_MODEL
 
 
 def _meeting_title_model(req_model: str | None = None) -> str:
     if req_model:
         return req_model
     profile = _read_profile()
-    return profile.get("CHATVOICE_MEETING_TITLE_MODEL") or profile.get("OPENAI_API_MODEL") or MEETING_TITLE_MODEL
+    return profile.get("CHATVOICE_MEETING_TITLE_MODEL") or profile.get("CHATVOICE_OPENAI_API_MODEL") or MEETING_TITLE_MODEL
 
 
 def _utc_timestamp(epoch: float | None = None) -> str:
@@ -379,8 +379,8 @@ def _database_health_summary() -> dict[str, Any]:
 
 def _safe_profile_summary() -> dict[str, Any]:
     profile = _read_profile()
-    key = (profile.get("OPENAI_API_KEY") or "").strip()
-    base = profile.get("OPENAI_API_BASE", "")
+    key = (profile.get("CHATVOICE_OPENAI_API_KEY") or "").strip()
+    base = profile.get("CHATVOICE_OPENAI_API_BASE", "")
     parsed = urlparse(base) if base else None
     token_plan_key = _is_token_plan_key(key) if key else False
     return {

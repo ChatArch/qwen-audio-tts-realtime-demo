@@ -59,7 +59,7 @@ def test_settings_panel_surfaces_server_side_api_key_status_without_browser_secr
     assert "api-key-config-title" in settings_markup
     assert "服务端 API Key" in settings_markup
     assert "CHATVOICE_ASR_API_KEY" in settings_markup
-    assert "OPENAI_API_KEY" in settings_markup
+    assert "CHATVOICE_OPENAI_API_KEY" in settings_markup
     assert "sk-sp" in settings_markup
     assert "DASHSCOPE_API_KEY" not in settings_markup
     assert "api-key-status-list" in settings_markup
@@ -334,7 +334,7 @@ def test_voice_studio_uses_local_one_shot_clone_flow_instead_of_voice_id_enrollm
     synth_body = _function_body(source, "synthesizeVoice")
     assert "voiceSource === 'clone'" in synth_body
     assert "createClonedVoice" in synth_body
-    assert "系统音色未配置 Token Plan OPENAI_API_KEY" in synth_body
+    assert "系统音色未配置 Token Plan CHATVOICE_OPENAI_API_KEY" in synth_body
 
     select_body = _function_body(source, "selectTtsVoice")
     assert "voice === 'clone'" in select_body

@@ -1,6 +1,6 @@
 # 运行目录与数据结构
 
-这一页说明 `pip install "ChatVoice[web]==0.1.10"` 之后，代码安装在哪里、运行数据默认写到哪里，以及 SQLite / 浏览器侧分别保存什么。
+这一页说明 `pip install "ChatVoice[web]==0.1.11"` 之后，代码安装在哪里、运行数据默认写到哪里，以及 SQLite / 浏览器侧分别保存什么。
 
 ## 代码安装位置
 
@@ -105,16 +105,26 @@ Settings 页面只显示服务端 API key 是否已配置，不会在浏览器�
 export CHATVOICE_ASR_CHANNEL=api-server
 export CHATVOICE_ASR_API_URL="https://<asr-service>/v1/transcribe"
 # Store CHATVOICE_ASR_API_KEY in ChatEnv ChatVoice profile when the ASR endpoint requires it.
-# Store OPENAI_API_BASE / OPENAI_API_KEY / OPENAI_API_MODEL in ChatEnv ChatVoice profile.
-# Production OPENAI_API_KEY should be a Token Plan sk-sp... key, not a usage-billed sk-... key.
+# Store CHATVOICE_OPENAI_API_BASE / CHATVOICE_OPENAI_API_KEY / CHATVOICE_OPENAI_API_MODEL in ChatEnv ChatVoice profile.
+# Production CHATVOICE_OPENAI_API_KEY should be a Token Plan sk-sp... key, not a usage-billed sk-... key.
+```
+
+## 数据备份 / 恢复
+
+ChatVoice 的 packaged storage 是一个 SQLite 文件，不需要 `DATABASE_URL`。备份/迁移以单文件为单位：
+
+```bash
+chatvoice data dump --output backup.sqlite3 --json
+# 恢复前先停止正在写入的服务；import 会默认备份当前数据库。
+chatvoice data import backup.sqlite3 --yes --json
 ```
 
 ## 高并发 TODO
 
-`0.1.10` 的 packaged legacy storage 仍只支持 SQLite WAL，适合单服务进程、轻并发和内部受控使用：
+`0.1.11` packaged storage 支持 SQLite WAL，适合单服务进程、轻并发和内部受控使用：
 
 ```bash
 chatvoice serve app --workers 1
 ```
 
-高并发生产部署列入 TODO，不在当前版本实现：在扩展到多 worker / 多节点前，需要把 `accounts`、`auth_sessions`、`api_tokens`、`meeting_records`、`conversation_records` 迁移到 Postgres/MySQL，并增加对应 repository 层和迁移脚本。
+高并发 Postgres/MySQL 支持是未来单独 storage-layer migration，不是当前 `DATABASE_URL` 开关。在扩展到多 worker / 多节点前，需要把 `accounts`、`auth_sessions`、`api_tokens`、`meeting_records`、`conversation_records` 迁移到外部数据库，并增加对应 repository 层和迁移脚本。
